@@ -1,0 +1,171 @@
+{% if section.settings.timer %}
+
+<div class="countdown-timer--wrapper">
+    <a href="{{ section.settings.url }}" class="countdown-timer--url">
+    <div class="countdown-timer--container">
+        <div class="countdown-timer--left">
+            <span>{{ section.settings.first_text }}</span>
+            <strong>{{ section.settings.second_text }}</strong>
+        </div>
+        <div class="countdown-timer--right">
+            <span>{{ section.settings.third_text }}</span>
+            <div class="countdown-timer">-D --:--:--</div>
+        </div>
+    </div>
+    </a>
+</div>
+
+<script> 
+(function initCountdownTimer(){
+    // gets the timer value
+    var countdown_timer = '{{ section.settings.timer }}';
+    if(!countdown_timer) return null;
+
+    // splits the time value to create the date variable
+    var finalDate_timer = countdown_timer.split(' ')[0].split('/');
+    var finalTime_timer = countdown_timer.split(' ')[1].split(':');
+    var finalDate_js = new Date(finalDate_timer[2], finalDate_timer[0]-1, finalDate_timer[1], finalTime_timer[0], finalTime_timer[1]);
+    if(!finalDate_js) return null;
+
+    // calculate the remaining time for the timer (if its zero, it hides the whole component)
+    var remaining_time = (finalDate_js.getTime() - new Date().getTime()) / 1000;
+    if(remaining_time <= 0){
+        document.querySelector('.countdown-timer--wrapper').style.display = "none";
+        return null;
+    }
+
+    // start the interval that runs every 1 sec
+    setInterval(function(){       
+
+        // check the remaining time for the timer (if its zero, it hides the whole component)
+        if(remaining_time < 0){
+            document.querySelector('.countdown-timer--wrapper').style.display = "none";
+            return null;
+        }
+
+        // create the time object with each remaining value
+        var objTime = {
+            days: Math.floor(((remaining_time % 31536000) % 2628000) / 86400),
+            hours: Math.floor((remaining_time % (3600 * 24)) / 3600),
+            minutes: Math.floor((remaining_time % 3600) / 60),
+            seconds: Math.floor(remaining_time % 60)
+        };
+
+        // update the html in the countdown component
+        document.querySelector('.countdown-timer').innerHTML = objTime.days+'D '+
+            (objTime.hours>9?objTime.hours:'0'+objTime.hours)+':'+
+            (objTime.minutes>9?objTime.minutes:'0'+objTime.minutes)+':'+
+            (objTime.seconds>9?objTime.seconds:'0'+objTime.seconds);
+
+        // subtracts 1 sec from the remaining time before the loop ends
+        remaining_time -= 1;
+
+    }, 1000);
+})();
+</script>
+
+{% endif %}
+
+
+{% stylesheet %}
+.countdown-timer--wrapper {
+    background: #000;
+    padding: 10px;
+}
+a.countdown-timer--url {
+    text-decoration: none;
+}
+.countdown-timer--container {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    display: flex;
+    color: #fff;
+    padding: 5px 3em;
+}
+.countdown-timer--container>div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.countdown-timer--right {
+    text-align: right;
+}
+.countdown-timer--container>div span {
+    font-size: 16px;
+    text-transform: uppercase;
+    color: #eee;
+    line-height: 18px;
+}
+.countdown-timer--container>div strong {
+    font-size: 36px;
+    text-transform: uppercase;
+    line-height: 38px;
+    color: #fff;
+}
+.countdown-timer {
+    font-size: 24px;
+    text-transform: uppercase;
+    line-height: 28px;
+    color: #fff;
+    font-weight: 800;
+}
+@media screen and (max-width: 767px){
+    .countdown-timer--container {
+        padding: 0;
+    }
+    .countdown-timer--container>div span {
+        font-size: 14px;
+        line-height: 16px;
+    }
+    .countdown-timer--container>div strong {
+        font-size: 28px;
+        line-height: 32px;
+    }
+}
+{% endstylesheet %}
+
+{% schema %}
+    {
+        "name": "Countdown Timer Banner",
+        "tag": "section",
+        "settings": [
+            {
+                "type": "text",
+                "id": "first_text",
+                "label": "First Text (Top left)",
+                "default": "Shop our best deals for"
+            },
+            {
+                "type": "text",
+                "id": "second_text",
+                "label": "Second Text (Bottom left)",
+                "default": "BLACK FRIDAY"
+            },
+            {
+                "type": "text",
+                "id": "third_text",
+                "label": "Third Text (Top Right)",
+                "default": "Offers ends in"
+            },
+            {
+                "type": "text",
+                "id": "url",
+                "label": "URL",
+                "default": "#"
+            },
+            {
+                "type": "text",
+                "id": "timer",
+                "label": "Date and time to countdown",
+                "placeholder": "MM/DD/YYYY HH:mm"
+            }
+        ],
+        "presets": [
+            {
+                "name": "Countdown Timer Banner",
+                "category": "Banners"
+            }
+        ]
+    }
+{% endschema %}
